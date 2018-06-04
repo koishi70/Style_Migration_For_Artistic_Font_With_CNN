@@ -16,12 +16,15 @@ python.exe neural_style_transfer.py 风格图片所在目录  输出文件夹
 
 
 ## 一些说明
-神经网络基于keras官方的风格迁移的例子，经过一定的调整loss函数和调参后得到最适合于艺术风格字体的图片。<br>
+神经网络基于[keras](https://github.com/keras-team/keras/blob/master/examples/neural_style_transfer.py)官方的风格迁移的例子，经过一定的调整loss函数和调参后得到最适合于艺术风格字体的图片。<br>
 调整包括：<br>
 ##### 1.加入生成文字图片的方法，以及提供一系列图片生成相关接口，便于您第一时间修改结果
 ##### 2.修改了loss函数，经过大量实验，确定使用keras提供的VGG19网络的'block1_conv1','block2_conv1','block3_conv1'三层作为风格损失，去除内容损失
 ##### 3.加入一些图片的增强方法，使得结果更加色彩丰富
+##### 4.在style文件夹下提供了一系列图片供您探索
+##### 4.运行需要Keras支持，建议使用GPU运算，在	Nvidia GeForce GTX 1050 Ti (4 GB)上，一次迭代大约3s，一张图片耗时2-3min
 
+	
 ## 下面给出一些例子
 ![竹](https://github.com/yuweiming70/Style_Migration_For_Artistic_Font_With_CNN/blob/master/example/%E7%AB%B9_%E4%BB%A3%E6%95%B0_49.png)  
 ![花](https://github.com/yuweiming70/Style_Migration_For_Artistic_Font_With_CNN/blob/master/example/%E8%8A%B1_%E4%BB%A3%E6%95%B0_49.png)  
