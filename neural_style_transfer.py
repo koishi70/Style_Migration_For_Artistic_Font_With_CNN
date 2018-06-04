@@ -168,7 +168,7 @@ char_image = char_to_picture(chars,font_name=font_name,background_color=backgrou
                              smooth_times=smooth_times,noise=noise)
 width, height = char_image.size
 
-# 风格损失的权重没有意义，因为对于一张文字图片来说，不可能有没有内容损失
+# 风格损失的权重没有意义，因为对于一张文字图片来说，不可能有内容损失
 style_weight = 1.0
 
 # util function to resize and format pictures into appropriate tensors
