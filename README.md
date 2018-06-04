@@ -25,7 +25,7 @@ python.exe neural_style_transfer.py 风格图片所在目录  输出文件夹
 ##### 4.运行需要Keras支持，建议使用GPU运算，在	Nvidia GeForce GTX 1050 Ti (4 GB)上，一次迭代大约3s，一张图片耗时2-3min
 
 	
-## 下面给出一些例子
+## 下面给出一些例子，在example文件夹下有其对应的风格图片
 ![竹](https://github.com/yuweiming70/Style_Migration_For_Artistic_Font_With_CNN/blob/master/example/%E7%AB%B9_%E4%BB%A3%E6%95%B0_49.png)  
 ![花](https://github.com/yuweiming70/Style_Migration_For_Artistic_Font_With_CNN/blob/master/example/%E8%8A%B1_%E4%BB%A3%E6%95%B0_49.png)  
 ![雨](https://github.com/yuweiming70/Style_Migration_For_Artistic_Font_With_CNN/blob/master/example/%E9%9B%A8_%E4%BB%A3%E6%95%B0_49.png)  
