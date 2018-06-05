@@ -1,5 +1,5 @@
 # Style Migration For Artistic Font With CNN
-基于卷积神经网络的风格迁移，制造出带有艺术风格的字体
+基于卷积神经网络的风格迁移，超越艺术字
 ===
 使用方法很简单，只需要输入：<br>
 python.exe neural_style_transfer.py 风格图片所在目录  输出文件夹 
