@@ -146,6 +146,8 @@ parser.add_argument('--noise', type=bool, default=True, required=False,
                     help='加上随机噪音.')
 parser.add_argument('--image_enhance', type=bool, default=False, required=False,
                     help='图像增强.')
+parser.add_argument('--output_per_iter', type=int, default=2, required=False,
+                    help='每多少次迭代代可以输出一张图片.')
 
 # 获取参数
 args = parser.parse_args()
@@ -159,6 +161,7 @@ font_name = args.font_name
 smooth_times = args.smooth_times
 noise = args.noise
 image_enhance = args.image_enhance
+output_per_iter = args.output_per_iter
 background_color = str_to_tuple(args.background_color)
 text_color = str_to_tuple(args.text_color)
 
@@ -355,6 +358,6 @@ for i in range(iterations):
     end_time = time.time()
     print('耗时%.2f s' % (end_time - start_time))
 
-    if i%5 == 0 or i == iterations-1:
+    if i%output_per_iter == 0 or i == iterations-1:
         save_img(fname, img, image_enhance=image_enhance)
         print('文件保存为', fname)
