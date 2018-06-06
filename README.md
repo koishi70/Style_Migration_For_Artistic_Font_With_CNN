@@ -13,6 +13,7 @@ python.exe neural_style_transfer.py 风格图片所在目录  输出文件夹
 <br>  --image_enhance True    # 生成图片是否进行增强，包括色度，亮度，锐度增强
 <br>  --font_name  宋体  # 文字字体，支持宋体，楷体，黑体，仿宋，等线
 <br>  --reverse_color False  # True-黑纸白字，False-白纸黑字，默认白纸黑字
+<br>  --output_per_iter 2  # 每隔多少次迭代输出一张图片
 
 
 ## 一些说明
