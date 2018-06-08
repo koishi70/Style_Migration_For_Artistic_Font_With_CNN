@@ -35,3 +35,5 @@ python.exe neural_style_transfer.py 风格图片所在目录  输出文件夹
 ![木](https://github.com/yuweiming70/Style_Migration_For_Artistic_Font_With_CNN/blob/master/example/%E6%9C%A8_%E4%BB%A3%E6%95%B0_49.png)  
 ![火](https://github.com/yuweiming70/Style_Migration_For_Artistic_Font_With_CNN/blob/master/example/%E7%81%AB_%E4%BB%A3%E6%95%B0_49.png)  
 ![星](https://github.com/yuweiming70/Style_Migration_For_Artistic_Font_With_CNN/blob/master/example/%E6%98%9F_%E4%BB%A3%E6%95%B0_49.png)  
+![石](https://github.com/yuweiming70/Style_Migration_For_Artistic_Font_With_CNN/blob/master/example/%E7%9F%B3_%E4%BB%A3%E6%95%B0_150.png)  
+
