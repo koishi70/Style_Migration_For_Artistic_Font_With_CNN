@@ -20,8 +20,8 @@ python.exe neural_style_transfer.py 风格图片所在目录  输出文件夹
 
 ## 6.13更新
 ##### 1.支持两张风格图片，使用第一张*k+第二张*(1-k)，可以平滑调节两张图片的风格过渡。
-##### 2.支持调节随机噪音的强度，为图片加上“noise×图片边长”个噪点
-
+##### 2.支持调节随机噪音的强度，为图片加上“noise×图片边长”个噪点。
+##### 3.精细调参，三层卷积层的权重改为10:1:1，颜色更艳丽。
 
 ## 一些说明
 神经网络基于[keras](https://github.com/keras-team/keras/blob/master/examples/neural_style_transfer.py)官方的风格迁移的例子，经过一定的调整loss函数和调参后得到最适合于艺术风格字体的代码。<br>
