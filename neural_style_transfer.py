@@ -8,7 +8,8 @@ from scipy.misc import imsave
 from keras.applications import vgg19
 from keras import backend as K
 import os
-from PIL import Image, ImageFont, ImageDraw, ImageOps, ImageEnhance
+from PIL import Image, ImageFont, ImageDraw, ImageOps, ImageEnhance, ImageFilter
+
 import random
 random.seed(0)
 
@@ -65,7 +66,7 @@ def str_to_tuple(s):
 
 
 def char_to_picture(text="", font_name="宋体", background_color=(255,255,255), text_color=(0,0,0), pictrue_size=400,
-                    text_position=(0, 0), in_meddium=False, reverse_color=False,smooth_times=0,noise=True):
+                    text_position=(0, 0), in_meddium=False, reverse_color=False,smooth_times=0,noise=0):
     pictrue_shape = (pictrue_size,pictrue_size)
     im = Image.new("RGB", pictrue_shape, background_color)
     dr = ImageDraw.Draw(im)
@@ -89,9 +90,17 @@ def char_to_picture(text="", font_name="宋体", background_color=(255,255,255),
 
     # 开始绘图
     # 如果设置了居中，那么就居中
+    # 英文字母的对齐方式并不一样
+    char_dict = []
+    for i in range(26):
+        char_dict.append(chr(i + ord('a')))
+        char_dict.append(chr(i + ord('A')))
     if in_meddium:
         char_num = len(text)
-        text_position = (pictrue_shape[0]/2 - char_num*font_size/2, pictrue_shape[1]/2 - font_size/2)
+        text_position = (pictrue_shape[0]/2 - char_num*font_size/2, pictrue_shape[1]/2 - font_size/2)  # 中文
+        if text in char_dict:
+            text_position = (pictrue_shape[0] / 2 - char_num*font_size/4, pictrue_shape[1] / 2 - font_size / 2)  # 英文
+
 
     # 开始绘制图像
     dr.text(text_position, text, font=font, fill=text_color)
@@ -99,17 +108,21 @@ def char_to_picture(text="", font_name="宋体", background_color=(255,255,255),
         im = ImageOps.invert(im)
 
     # 随机扰动
-    if noise:
+    if noise > 0:
         print("adding noise...")
-        random_num = int(pictrue_size*1.5)
         im_array = np.array(im)
-        for i in range(random_num):
+        noise_num = noise * pictrue_size
+        for i in range(noise_num):
             pos = (random.randint(0,pictrue_size-1), random.randint(0,pictrue_size-1))
             color = [random.randint(0,255), random.randint(0,255), random.randint(0,255)]
             im_array[pos[0],pos[1],:] = color
         im = Image.fromarray(im_array)
 
     # 模糊化图片
+    '''
+    for i in range(smooth_times):
+        im =im.filter(ImageFilter.GaussianBlur)
+    '''
     im_array = np.array(im)
     for i in range(smooth_times):
         im_array = smooth(im_array)
@@ -142,16 +155,24 @@ parser.add_argument('--background_color', type=str, default="(255,255,255)", req
                     help='文字图片背景颜色.')
 parser.add_argument('--text_color', type=str, default="(0,0,0)", required=False,
                     help='文字颜色.')
-parser.add_argument('--noise', type=bool, default=True, required=False,
-                    help='加上随机噪音.')
+parser.add_argument('--noise', type=int, default=1, required=False,
+                    help='加上随机噪音的等级.')
 parser.add_argument('--image_enhance', type=bool, default=False, required=False,
                     help='图像增强.')
-parser.add_argument('--output_per_iter', type=int, default=2, required=False,
-                    help='每多少次迭代代可以输出一张图片.')
+parser.add_argument('--image_input_mode', type=str, default="one_pic", required=False,
+                    help='输入的风格图片允许使用一下mode：'
+                         'one_pic:一张风格图片'
+                         'one_pic_T:一张风格图片，但是这张图片经过旋转90度后当作第二张,特别适合汉字的横竖笔画'
+                         'two_pic:两张风格图片')
+parser.add_argument('--two_style_k', type=float, default=0.5, required=False,
+                    help='两张图片的相对权重，第一张*k+第二张*(1-k)')
+parser.add_argument('--style_reference_image2_path', metavar='ref', type=str, required=False,
+                    help='第二张风格图片的位置')
 
 # 获取参数
 args = parser.parse_args()
 style_reference_image_path = args.style_reference_image_path
+style_reference_image2_path = args.style_reference_image2_path
 result_prefix = args.result_prefix
 iterations = args.iter
 chars = args.chars
@@ -161,9 +182,10 @@ font_name = args.font_name
 smooth_times = args.smooth_times
 noise = args.noise
 image_enhance = args.image_enhance
-output_per_iter = args.output_per_iter
 background_color = str_to_tuple(args.background_color)
 text_color = str_to_tuple(args.text_color)
+image_input_mode = args.image_input_mode
+two_style_k = args.two_style_k
 
 # 生成输入图片
 char_image = char_to_picture(chars,font_name=font_name,background_color=background_color,text_color=text_color,
@@ -171,7 +193,7 @@ char_image = char_to_picture(chars,font_name=font_name,background_color=backgrou
                              smooth_times=smooth_times,noise=noise)
 width, height = char_image.size
 
-# 风格损失的权重没有意义，因为对于一张文字图片来说，不可能有内容损失
+# 风格损失的权重没有意义，因为对于一张文字图片来说，不可能有没有内容损失
 style_weight = 1.0
 
 # util function to resize and format pictures into appropriate tensors
@@ -202,11 +224,22 @@ def deprocess_image(x):
     x = np.clip(x, 0, 255).astype('uint8')  # 以防溢出255范围
     return x
 
-# 得到需要处理的数据，处理为keras的变量（tensor），处理为一个(3, width, height, 3)的矩阵，分别是文字图片，风格图片，结果图片
+# 得到需要处理的数据，处理为keras的变量（tensor），处理为一个(5, width, height, 3)的矩阵
+# 分别是文字图片，风格图片1，风格图片1T, 风格图片2，结果图片
 base_image = K.variable(preprocess_image(char_image))
-style_reference_image = K.variable(preprocess_image(load_img(style_reference_image_path)))
-combination_image = K.placeholder((1, width,height, 3))
-input_tensor = K.concatenate([base_image,style_reference_image,combination_image], axis=0)  # 结合以上三张图片，作为输入向量
+style_reference_image1 = K.variable(preprocess_image(load_img(style_reference_image_path)))
+style_reference_image1_T = K.variable(preprocess_image(load_img(style_reference_image_path).transpose(Image.ROTATE_90)))
+try:
+    style_reference_image2 = K.variable(preprocess_image(load_img(style_reference_image2_path)))
+except:  # 不会用到这个了
+    if image_input_mode == "two_pic":
+        print("尚未找到第二张图片，或许您忘记输入了，请输入--style_reference_image2_path 第二张图片的位置")
+    style_reference_image2 = K.variable(preprocess_image(load_img(style_reference_image_path)))
+
+combination_image = K.placeholder((1, width, height, 3))
+input_tensor = K.concatenate([base_image, style_reference_image1, style_reference_image1_T,
+                              style_reference_image2, combination_image], axis=0)
+# 结合以上5张图片，作为输入向量
 
 # 使用Keras提供的训练好的Vgg19网络
 model = vgg19.VGG19(input_tensor=input_tensor,weights='imagenet', include_top=False)
@@ -216,19 +249,19 @@ Layer (type)                 Output Shape              Param #
 =================================================================
 input_1 (InputLayer)         (None, None, None, 3)     0
 _________________________________________________________________
-block1_conv1 (Conv2D)        (None, None, None, 64)    1792
+block1_conv1 (Conv2D)        (None, None, None, 64)    1792             A
 _________________________________________________________________
 block1_conv2 (Conv2D)        (None, None, None, 64)    36928
 _________________________________________________________________
 block1_pool (MaxPooling2D)   (None, None, None, 64)    0
 _________________________________________________________________
-block2_conv1 (Conv2D)        (None, None, None, 128)   73856
+block2_conv1 (Conv2D)        (None, None, None, 128)   73856            B
 _________________________________________________________________
 block2_conv2 (Conv2D)        (None, None, None, 128)   147584
 _________________________________________________________________
 block2_pool (MaxPooling2D)   (None, None, None, 128)   0
 _________________________________________________________________
-block3_conv1 (Conv2D)        (None, None, None, 256)   295168
+block3_conv1 (Conv2D)        (None, None, None, 256)   295168           C
 _________________________________________________________________
 block3_conv2 (Conv2D)        (None, None, None, 256)   590080
 _________________________________________________________________
@@ -238,7 +271,7 @@ block3_conv4 (Conv2D)        (None, None, None, 256)   590080
 _________________________________________________________________
 block3_pool (MaxPooling2D)   (None, None, None, 256)   0
 _________________________________________________________________
-block4_conv1 (Conv2D)        (None, None, None, 512)   1180160
+block4_conv1 (Conv2D)        (None, None, None, 512)   1180160          D
 _________________________________________________________________
 block4_conv2 (Conv2D)        (None, None, None, 512)   2359808
 _________________________________________________________________
@@ -248,13 +281,13 @@ block4_conv4 (Conv2D)        (None, None, None, 512)   2359808
 _________________________________________________________________
 block4_pool (MaxPooling2D)   (None, None, None, 512)   0
 _________________________________________________________________
-block5_conv1 (Conv2D)        (None, None, None, 512)   2359808
+block5_conv1 (Conv2D)        (None, None, None, 512)   2359808          E
 _________________________________________________________________
 block5_conv2 (Conv2D)        (None, None, None, 512)   2359808
 _________________________________________________________________
 block5_conv3 (Conv2D)        (None, None, None, 512)   2359808
 _________________________________________________________________
-block5_conv4 (Conv2D)        (None, None, None, 512)   2359808
+block5_conv4 (Conv2D)        (None, None, None, 512)   2359808          F
 _________________________________________________________________
 block5_pool (MaxPooling2D)   (None, None, None, 512)   0
 =================================================================
@@ -277,23 +310,42 @@ def style_loss(style, combination):
     assert K.ndim(combination) == 3
     S = gram_matrix(style)
     C = gram_matrix(combination)
+    S_C = S-C
     channels = 3
     size = height * width
-    return K.sum(K.square(S - C)) / (4. * (channels ** 2) * (size ** 2))
+    return K.sum(K.square(S_C)) / (4. * (channels ** 2) * (size ** 2))
+    #return K.sum(K.pow(S_C,4)) / (4. * (channels ** 2) * (size ** 2))  # 居然和平方没有什么不同
+    #return K.sum(K.pow(S_C,4)+K.pow(S_C,2)) / (4. * (channels ** 2) * (size ** 2))  # 也能用，花后面出现了叶子
 
-# 结合多种损失
+
 loss = K.variable(0.)
 # 计算风格损失，糅合多个特征层的数据，取平均
-#                 [     A,              B,              C,              D,              E,              F     ]
-#feature_layers = ['block1_conv1', 'block2_conv1','block3_conv1', 'block4_conv1','block5_conv1','block5_conv4']
+#                  [     A,              B,              C,              D,              E,              F     ]
+# feature_layers = ['block1_conv1', 'block2_conv1','block3_conv1', 'block4_conv1','block5_conv1','block5_conv4']
 #                   A全是颜色，没有纹理---------------------------------------------------->F全是纹理，没有颜色
 feature_layers = ['block1_conv1','block2_conv1','block3_conv1']
-for layer_name in feature_layers:
+feature_layers_w = [10.0,1.0,1.0]
+for i in range(len(feature_layers)):
+    # 每一层的权重以及数据
+    layer_name, w = feature_layers[i], feature_layers_w[i]
     layer_features = outputs_dict[layer_name]
-    style_reference_features = layer_features[1, :, :, :]
-    combination_features = layer_features[2, :, :, :]
-    sl = style_loss(style_reference_features, combination_features)
-    loss += (style_weight / len(feature_layers)) * sl
+
+    style_reference_features1 = layer_features[1, :, :, :]
+    combination_features = layer_features[4, :, :, :]
+
+    if image_input_mode == "one_pic":
+        style_reference_features_mix = style_reference_features1
+    elif image_input_mode == "one_pic_T":
+        style_reference_features1_T = layer_features[2, :, :, :]
+        style_reference_features_mix = 0.5 * (style_reference_features1 + style_reference_features1_T)
+        #style_reference_features_mix = K.maximum(style_reference_features1, style_reference_features1_T)
+    else:  # image_input_mode == "two_pic"
+        style_reference_features2 = layer_features[3, :, :, :]
+        k = two_style_k
+        style_reference_features_mix = style_reference_features1 * k + style_reference_features2 * (1-k)
+
+    loss += w * style_loss(style_reference_features_mix, combination_features)
+
 
 # 求得梯度，输入combination_image，对loss求梯度
 grads = K.gradients(loss, combination_image)
@@ -358,6 +410,6 @@ for i in range(iterations):
     end_time = time.time()
     print('耗时%.2f s' % (end_time - start_time))
 
-    if i%output_per_iter == 0 or i == iterations-1:
+    if i%5 == 0 or i == iterations-1:
         save_img(fname, img, image_enhance=image_enhance)
         print('文件保存为', fname)
