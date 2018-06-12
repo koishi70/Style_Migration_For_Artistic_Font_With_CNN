@@ -9,11 +9,18 @@ python.exe neural_style_transfer.py 风格图片所在目录  输出文件夹
 <br>  --text_color (255,255,255)   # 文字图片中文字的颜色
 <br>  --iter 50   # 迭代次数，一般50代左右就行
 <br>  --smooth_times 20   # 文字图片是否进行模糊化处理
-<br>  --noise True   # 文字图片是否加入随机噪声
+<br>  --noise 10   # 文字图片加入随机噪声的等级
 <br>  --image_enhance True    # 生成图片是否进行增强，包括色度，亮度，锐度增强
 <br>  --font_name  宋体  # 文字字体，支持宋体，楷体，黑体，仿宋，等线
 <br>  --reverse_color False  # True-黑纸白字，False-白纸黑字，默认白纸黑字
 <br>  --output_per_iter 2  # 每隔多少次迭代输出一张图片
+<br>  --image_input_mode  one_pic  # 输入的风格图片允许使用一下mode： 'one_pic:一张风格图片'，'one_pic_T:一张风格图片，但是这张图片经过旋转90度后当作第二张,特别适合汉字的横竖笔画'，'two_pic:两张风格图片'
+<br>  --style_reference_image2_path  # 第二张风格图片的位置，没有第二张不填
+<br>  --two_style_k 0.9  # 两张图片的相对权重，第一张*k+第二张*(1-k)
+
+## 6.13更新
+##### 1.支持两张风格图片，使用第一张*k+第二张*(1-k)，可以平滑调节两张图片的风格过渡。
+##### 2.支持调节随机噪音的强度，为图片加上“noise×图片边长”个噪点
 
 
 ## 一些说明
