@@ -167,7 +167,7 @@ parser.add_argument('--image_input_mode', type=str, default="one_pic", required=
 parser.add_argument('--two_style_k', type=float, default=0.5, required=False,
                     help='两张图片的相对权重，第一张*k+第二张*(1-k)')
 parser.add_argument('--style_reference_image2_path', metavar='ref', type=str, required=False,
-                    help='第二张风格图片的位置')
+                    help='第二张图片的位置')
 
 # 获取参数
 args = parser.parse_args()
