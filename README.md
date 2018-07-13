@@ -19,10 +19,10 @@ python.exe neural_style_transfer.py "风格图片所在目录"  "输出文件夹
 <br>  --two_style_k 0.9  # 两张图片的相对权重，第一张*k+第二张*(1-k)
 
 ## 一些使用的例子
-单一风格：
+单一风格：<br>
 "C:\Program Files (x86)\Microsoft Visual Studio\Shared\Anaconda3_64\python.exe" "E:\学习\大三下\人工智能导论\风格转移字体\neural_style_transfer.py"  "E:\学习\大三下\人工智能导论\风格转移字体\style\bamboo\5.jpg" E:\学习\大三下\人工智能导论\风格转移字体\输出\ --pictrue_size 300 --background_color (255,255,255) --text_color (0,0,0) --iter 30 --chars 竹 --smooth_times 20 --noise 10 --image_enhance True --image_input_mode one_pic
 
-两个风格：
+两个风格：<br>
 "C:\Program Files (x86)\Microsoft Visual Studio\Shared\Anaconda3_64\python.exe" "E:\学习\大三下\人工智能导论\风格转移字体\neural_style_transfer.py"  "E:\学习\大三下\人工智能导论\风格转移字体\style\stone\2.jpg" E:\学习\大三下\人工智能导论\风格转移字体\输出\ --pictrue_size 300 --background_color (255,255,255) --text_color (0,0,0) --iter 50 --chars 石 --smooth_times 20 --noise  10 --image_enhance True --image_input_mode two_pic --style_reference_image2_path "E:\学习\大三下\人工智能导论\风格转移字体\style\stone\3.jpg" --two_style_k 0.6
 
 # 7.13更新
