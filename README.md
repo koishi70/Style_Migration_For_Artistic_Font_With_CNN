@@ -2,7 +2,7 @@
 基于卷积神经网络的风格迁移，超越艺术字
 ===
 使用方法很简单，只需要输入：<br>
-python.exe neural_style_transfer.py 风格图片所在目录  输出文件夹 
+python.exe neural_style_transfer.py "风格图片所在目录"  "输出文件夹"
 <br>  --chars 花  # 要生成的文字，支持一次输入多个文字
 <br>  --pictrue_size 300  # 生成图片大小
 <br>  --background_color (0,0,0)   # 文字图片中背景的颜色
@@ -17,6 +17,17 @@ python.exe neural_style_transfer.py 风格图片所在目录  输出文件夹
 <br>  --image_input_mode  one_pic  # 输入的风格图片允许使用一下mode： 'one_pic:一张风格图片'，'one_pic_T:一张风格图片，但是这张图片经过旋转90度后当作第二张,特别适合汉字的横竖笔画'，'two_pic:两张风格图片'
 <br>  --style_reference_image2_path  # 第二张风格图片的位置，没有第二张不填
 <br>  --two_style_k 0.9  # 两张图片的相对权重，第一张*k+第二张*(1-k)
+
+## 一些使用的例子
+单一风格：
+"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Anaconda3_64\python.exe" "E:\学习\大三下\人工智能导论\风格转移字体\neural_style_transfer.py"  "E:\学习\大三下\人工智能导论\风格转移字体\style\bamboo\5.jpg" E:\学习\大三下\人工智能导论\风格转移字体\输出\ --pictrue_size 300 --background_color (255,255,255) --text_color (0,0,0) --iter 30 --chars 竹 --smooth_times 20 --noise 10 --image_enhance True --image_input_mode one_pic
+
+两个风格：
+"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Anaconda3_64\python.exe" "E:\学习\大三下\人工智能导论\风格转移字体\neural_style_transfer.py"  "E:\学习\大三下\人工智能导论\风格转移字体\style\stone\2.jpg" E:\学习\大三下\人工智能导论\风格转移字体\输出\ --pictrue_size 300 --background_color (255,255,255) --text_color (0,0,0) --iter 50 --chars 石 --smooth_times 20 --noise  10 --image_enhance True --image_input_mode two_pic --style_reference_image2_path "E:\学习\大三下\人工智能导论\风格转移字体\style\stone\3.jpg" --two_style_k 0.6
+
+# 7.13更新
+##### 1.更新了使用例子
+##### 2.代码稍作调整
 
 ## 6.13更新
 ##### 1.支持两张风格图片，使用第一张*k+第二张*(1-k)，可以平滑调节两张图片的风格过渡。
